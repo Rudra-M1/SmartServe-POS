@@ -6,28 +6,26 @@ RUN apk add --no-cache git curl libpng-dev oniguruma-dev libxml2-dev zip unzip n
 # 2. PHP extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
 
-# 3. Composer
+# 3. Composer setup
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
-
-# Sabse pehle sirf composer files copy karenge
-COPY composer.json composer.lock ./
-
-# Yahan hum purana koi bhi vendor folder delete karke fresh install karenge
-RUN composer install --no-dev --no-scripts --no-autoloader --ignore-platform-reqs
-
-# Ab baaki project files copy karenge
 COPY . .
 
-# Final optimization and cleanup
-RUN rm -rf vendor/symfony/polyfill-php84 # Khass karke is file ko delete kar rahe hain jo error de rahi thi
-RUN composer dump-autoload --optimize --ignore-platform-reqs
+# 4. Backend Build - Fresh start
+RUN rm -rf vendor composer.lock
+RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-# 4. Frontend build
-RUN npm install && npm run build
+# 5. Frontend Build - Sabse important fixes yahan hain
+RUN rm -rf node_modules package-lock.json
+RUN npm install
+# Permission fix: Vite ko chalne ki ijazat dena
+RUN chmod +x node_modules/.bin/vite
+RUN npm run build
 
+# 6. Permissions set karo
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 80
 
