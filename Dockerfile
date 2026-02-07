@@ -1,29 +1,32 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.4-apache
 
-RUN apk add --no-cache git curl libpng-dev oniguruma-dev libxml2-dev zip unzip nginx postgresql-dev nodejs npm
+# 1. Install System Dependencies
+RUN apt-get update && apt-get install -y \
+    git curl libpng-dev libonig-dev libxml2-dev zip unzip libpq-dev nodejs npm \
+    && a2enmod rewrite
 
-RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
+# 2. PHP Extensions
+RUN docker-php-ext-install pdo_pgsql mbstring
 
+# 3. Apache Config (White Screen Fix)
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 4. Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
+WORKDIR /var/www/html
 COPY . .
 
-# Backend build
-RUN rm -rf vendor composer.lock
-RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
+# 5. Build Backend & Frontend
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+RUN npm install && npm run build
 
-# Frontend build
-RUN rm -rf node_modules package-lock.json
-RUN npm install
-RUN chmod +x node_modules/.bin/vite
-RUN npm run build
-
-# PERMISSIONS FIX (Sabse zaroori white screen ke liye)
-RUN chmod -R o+w storage bootstrap/cache
-RUN chown -R www-data:www-data /var/www
+# 6. Permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
 
-# Serve from PUBLIC folder
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=80
+# 7. Start Command
+CMD php artisan migrate --force && apache2-foreground
