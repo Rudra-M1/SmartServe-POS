@@ -1,34 +1,39 @@
-# Latest PHP image use kar rahe hain
-FROM php:8.4-fpm
+# Seedha PHP 8.4 Alpine (Halki aur fast image) use kar rahe hain
+FROM php:8.4-fpm-alpine
 
-RUN apt-get update && apt-get install -y \
+# 1. System dependencies install karo (Alpine version)
+RUN apk add --no-cache \
     git \
     curl \
     libpng-dev \
-    libonig-dev \
+    oniguruma-dev \
     libxml2-dev \
     zip \
     unzip \
     nginx \
-    libpq-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    postgresql-dev \
+    nodejs \
+    npm
 
+# 2. PHP extensions install karo
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
 
+# 3. Composer copy karo
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 COPY . .
 
-# Is line se saare version errors solve ho jayenge
+# 4. Backend build (Sare requirements ignore karke)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && apt-get install -y nodejs
+# 5. Frontend build
 RUN npm install && npm run build
 
+# 6. Permissions set karo
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 80
 
+# 7. Start command
 CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=80
