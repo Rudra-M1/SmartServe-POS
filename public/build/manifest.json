@@ -1,0 +1,78 @@
+{
+  "_Card-BEfGtvOZ.js": {
+    "file": "assets/Card-BEfGtvOZ.js",
+    "name": "Card",
+    "imports": [
+      "resources/js/app.jsx"
+    ]
+  },
+  "_plus-C7cn3l7o.js": {
+    "file": "assets/plus-C7cn3l7o.js",
+    "name": "plus",
+    "imports": [
+      "_Card-BEfGtvOZ.js"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-CtE0N84e.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/Pages/Customers/Index.jsx": {
+    "file": "assets/Index-ZR7JDOON.js",
+    "name": "Index",
+    "src": "resources/js/Pages/Customers/Index.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Card-BEfGtvOZ.js"
+    ]
+  },
+  "resources/js/Pages/Dashboard.jsx": {
+    "file": "assets/Dashboard-Dm1pFslP.js",
+    "name": "Dashboard",
+    "src": "resources/js/Pages/Dashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Card-BEfGtvOZ.js",
+      "_plus-C7cn3l7o.js"
+    ]
+  },
+  "resources/js/Pages/POS.jsx": {
+    "file": "assets/POS-B9_Qqxvg.js",
+    "name": "POS",
+    "src": "resources/js/Pages/POS.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Card-BEfGtvOZ.js",
+      "_plus-C7cn3l7o.js"
+    ]
+  },
+  "resources/js/Pages/Products/Index.jsx": {
+    "file": "assets/Index-BCzlvf6O.js",
+    "name": "Index",
+    "src": "resources/js/Pages/Products/Index.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.jsx",
+      "_Card-BEfGtvOZ.js"
+    ]
+  },
+  "resources/js/app.jsx": {
+    "file": "assets/app-S19h9DNE.js",
+    "name": "app",
+    "src": "resources/js/app.jsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/Pages/Customers/Index.jsx",
+      "resources/js/Pages/Dashboard.jsx",
+      "resources/js/Pages/POS.jsx",
+      "resources/js/Pages/Products/Index.jsx"
+    ],
+    "css": [
+      "assets/app-CtE0N84e.css"
+    ]
+  }
+}
