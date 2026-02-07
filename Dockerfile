@@ -1,11 +1,11 @@
 FROM php:8.4-apache
 
-# 1. Install System Dependencies
+# 1. Install System Dependencies (libpq-dev for Postgres)
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip libpq-dev nodejs npm \
     && a2enmod rewrite
 
-# 2. PHP Extensions
+# 2. PHP Extensions (Postgres support zaroori hai)
 RUN docker-php-ext-install pdo_pgsql mbstring
 
 # 3. Apache Config (White Screen Fix)
@@ -19,12 +19,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
+# Force Laravel to use Postgres
+ENV DB_CONNECTION=pgsql
+
 # 5. Build Backend & Frontend
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN npm install && npm run build
 
 # 6. Permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
 
