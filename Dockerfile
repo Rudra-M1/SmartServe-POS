@@ -1,11 +1,11 @@
 FROM php:8.4-apache
 
-# 1. Install System Dependencies (libpq-dev for Postgres)
+# 1. Install System Dependencies
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip libpq-dev nodejs npm \
     && a2enmod rewrite
 
-# 2. PHP Extensions (Postgres support zaroori hai)
+# 2. PHP Extensions
 RUN docker-php-ext-install pdo_pgsql mbstring
 
 # 3. Apache Config (White Screen Fix)
@@ -22,7 +22,8 @@ COPY . .
 # Force Laravel to use Postgres
 ENV DB_CONNECTION=pgsql
 
-# 5. Build Backend & Frontend
+# 5. Clean & Build (Yahan fresh install confirm kar rahe hain)
+RUN rm -rf vendor node_modules
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN npm install && npm run build
 
@@ -33,4 +34,5 @@ RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 EXPOSE 80
 
 # 7. Start Command
+# Migration pehle chalegi, phir Apache server start hoga
 CMD php artisan migrate --force && apache2-foreground
