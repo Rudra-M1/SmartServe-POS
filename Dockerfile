@@ -19,10 +19,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# Force Laravel to use Postgres
+# Force Laravel to use Postgres and Production Mode
 ENV DB_CONNECTION=pgsql
+ENV APP_ENV=production
+ENV APP_DEBUG=false
 
-# 5. Clean & Build (Yahan fresh install confirm kar rahe hain)
+# 5. Clean & Build
 RUN rm -rf vendor node_modules
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN npm install && npm run build
@@ -34,5 +36,5 @@ RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 EXPOSE 80
 
 # 7. Start Command
-# Migration pehle chalegi, phir Apache server start hoga
-CMD php artisan migrate --force && apache2-foreground
+# Migration ke baad cache clear karna zaroori hai
+CMD php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && apache2-foreground
