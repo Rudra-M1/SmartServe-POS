@@ -38,3 +38,12 @@ EXPOSE 80
 # 7. Start Command
 # Migration ke baad cache clear karna zaroori hai
 CMD php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && apache2-foreground
+
+# Force Laravel to Production mode
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+
+# 5. Build Backend & Frontend (Ensure fresh build)
+RUN rm -rf vendor node_modules public/build
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+RUN npm install && npm run build
